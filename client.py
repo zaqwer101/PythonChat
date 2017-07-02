@@ -92,5 +92,7 @@ class Server(threading.Thread):
 
 print("Начинаем работу...")
 
-Server(SERVER_PORT).start()
-Client(ip, CLIENT_PORT).start()
+server = Server(SERVER_PORT)
+client = Client(ip, CLIENT_PORT)
+server.start()
+client.start()
