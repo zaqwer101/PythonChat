@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import threading
 import time
 import socket
@@ -5,14 +6,23 @@ import os
 
 SERVER_PORT = int(input("Введите порт сервера: "))
 CLIENT_PORT = int(input("Введите порт клиента: "))
-ip = str(input("Введите IP-адрес сервера: "))
-
+ip          = str(input("Введите IP-адрес сервера: "))
+messages    = []
 
 # ----------------------------------------------------------------------
+
+
+def handle_message(message):
+    messages.append(message)
+    os.system("clear")
+    for msg in messages:
+        print(msg)
+
 
 def all_die():
     client.die()
     server.die()
+
 
 class Client(threading.Thread):
     def die(self):
@@ -23,8 +33,9 @@ class Client(threading.Thread):
         self.isRunning = True
         try:
             while True:
-                message = str(input("Сообщение: "))
+                message = str(input(": "))
                 self.client_socket.send(message.encode())
+                handle_message("Вы: " + message)
         except Exception as e:
             print(e)
 
@@ -39,9 +50,13 @@ class Client(threading.Thread):
                 break
             except:
                 print("Не подключились")
+                time.sleep(2)
                 continue
-        self.setDaemon(False    )
+        self.setDaemon(False)
         self.isRunning = False
+
+
+# ----------------------------------------------------------------------
 
 
 class Server(threading.Thread):
@@ -55,7 +70,7 @@ class Server(threading.Thread):
             try:
                 message = conn.recv(16384).decode()
                 if message:
-                    print("Принято: " + message + "\n")
+                    handle_message("Собеседник: " + message)
                 else:
                     print("Получено пустое сообщение")
                     all_die()
@@ -77,7 +92,5 @@ class Server(threading.Thread):
 
 print("Начинаем работу...")
 
-server = Server(SERVER_PORT)
-server.start()
-client = Client(ip, CLIENT_PORT)
-client.start()
+Server(SERVER_PORT).start()
+Client(ip, CLIENT_PORT).start()
